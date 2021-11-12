@@ -20,25 +20,8 @@
 
 	let value = `Please wait while content loads...`;
 
-	async function getPageIndex() {
-		const response = await fetch($config.ajaxURL, {
-			method: "post",
-			headers: {
-				Accept: "application/json, text/plain, /",
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ action: "getIndex" }),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				pageIndex = data;
-				console.log(pageIndex);
-			});
-	}
-	getPageIndex();
-
-	/* my new generic function to grab text from the API */
-	const getTextFromAPI = async (action, id) => {
+	/* my even newer more generic function to grab text from the API */
+	const getResponseFromAPI = async (action, id, responseType) => {
 		const response = await fetch($config.ajaxURL, {
 			method: "post",
 			headers: {
@@ -47,16 +30,25 @@
 			},
 			body: JSON.stringify({ action: action, id: id }),
 		});
-		const text = await response.text();
-		return text;
+		if (responseType == "json") {
+			const processedResponse = await response.json();
+			return processedResponse;
+		} else {
+			const processedResponse = await response.text();
+			return processedResponse;
+		}
 	};
 
+	getResponseFromAPI("getIndex", null, "json").then(function (result) {
+		pageIndex = result;
+	});
+
 	/* grab the topnav */
-	getTextFromAPI("load", "TopNav").then(function (result) {
+	getResponseFromAPI("load", "TopNav", "text").then(function (result) {
 		TopNav = result;
 	});
 	/* grab the main page body */
-	getTextFromAPI("load", hash).then(function (result) {
+	getResponseFromAPI("load", hash, "text").then(function (result) {
 		value = result;
 	});
 
