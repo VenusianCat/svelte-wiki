@@ -4,7 +4,7 @@ import {
 } from "svelte/store";
 
 /* CONFIG */
-let localhostAjaxURL = 'http://localhost/svecipes/public/ajax.php';
+let localhostAjaxURL = 'http://localhost/svelte-wiki/public/ajax.php';
 let deployedAjaxURL = './ajax.php';
 let ajaxURL = (window.location.hostname === "localhost") ? localhostAjaxURL : deployedAjaxURL;
 
