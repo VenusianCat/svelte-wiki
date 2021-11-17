@@ -1,5 +1,5 @@
 /node_modules/
 /public/build/
-/public/content/
 
 .DS_Store
+*.md
