@@ -13,6 +13,7 @@
 
 	let hash = getHash();
 	let TopNav = "placeholder";
+	let Footer = "placeholder";
 	console.log(hash);
 	let pageIndex = Array();
 
@@ -48,6 +49,12 @@
 	getResponseFromAPI("load", "TopNav", "text").then(function (result) {
 		TopNav = result;
 	});
+
+	/* grab the footer */
+	getResponseFromAPI("load", "Footer", "text").then(function (result) {
+		Footer = result;
+	});
+
 	/* grab the main page body */
 	getResponseFromAPI("load", hash, "text").then(function (result) {
 		value = result;
@@ -112,9 +119,9 @@
 	}
 </script>
 
+<nav>{@html wikiFormat(marked(TopNav))}</nav>
 <section id="container">
 	<section id="pageContent">
-		<nav>{@html wikiFormat(marked(TopNav))}</nav>
 		<p>Now viewing: {pageTitle}</p>
 		{#if hash !== "Index"}
 			{@html wikiFormat(marked(value))}
@@ -137,6 +144,7 @@
 		</section>
 	{/if}
 </section>
+<nav>{@html wikiFormat(marked(Footer))}</nav>
 
 <style>
 	#editor {
