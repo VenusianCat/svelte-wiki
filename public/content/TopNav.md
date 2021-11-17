@@ -1,1 +1,1 @@
-[home](#Home) | IdeasForLunches | EthansFavorites
+[home](#Home) | IdeasForLunches | EthansFavorites | [index](#Index)

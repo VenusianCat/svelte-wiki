@@ -41,6 +41,7 @@
 
 	getResponseFromAPI("getIndex", null, "json").then(function (result) {
 		pageIndex = result;
+		console.log(pageIndex);
 	});
 
 	/* grab the topnav */
@@ -90,7 +91,9 @@
 
 	window.addEventListener("hashchange", function () {
 		hash = getHash();
-		getPageContentFromFilesystem();
+		getResponseFromAPI("load", hash, "text").then(function (result) {
+			value = result;
+		});
 	});
 
 	function saveData() {
@@ -113,16 +116,26 @@
 	<section id="pageContent">
 		<nav>{@html wikiFormat(marked(TopNav))}</nav>
 		<p>Now viewing: {pageTitle}</p>
-		{@html wikiFormat(marked(value))}
+		{#if hash !== "Index"}
+			{@html wikiFormat(marked(value))}
+		{:else}
+			<ul>
+				{#each pageIndex as page}
+					<li>{@html wikiFormat(page)}</li>
+				{/each}
+			</ul>
+		{/if}
 	</section>
-	<section id="editor">
-		<h2>
-			Markdown Editor <button id="saveData" on:click={saveData}
-				>Save</button
-			>
-		</h2>
-		<textarea bind:value />
-	</section>
+	{#if hash !== "Index"}
+		<section id="editor">
+			<h2>
+				Markdown Editor <button id="saveData" on:click={saveData}
+					>Save</button
+				>
+			</h2>
+			<textarea bind:value />
+		</section>
+	{/if}
 </section>
 
 <style>
