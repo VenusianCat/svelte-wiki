@@ -1,6 +1,5 @@
 /node_modules/
 /public/build/
+/public/content/
 
 .DS_Store
-*.md
-public/content/Home.md
