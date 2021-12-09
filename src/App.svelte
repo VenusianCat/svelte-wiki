@@ -70,21 +70,24 @@
 		return processedHash;
 	}
 
+	/* beyond Markdown syntax extensions; 
+	concept referred to as "Gimmicks" in MDwiki (see http://dynalon.github.io/mdwiki/#!gimmicks.md)
+	currently used here just to create custom wiki links - automatic hyperlinking to pages from expressions written in PascalCase */
 	function wikiFormat(text) {
-		const PascalCase = /[A-Z][a-z]+[A-Z][A-Za-z]+/g;
+		const PascalCase = /[ (]([A-Z][a-z]+[A-Z][A-Za-z]+)/g;
 
-		let wikiText = text.replaceAll(PascalCase, function (m) {
+		let wikiText = text.replaceAll(PascalCase, function (match, capture) {
 			let displayClass = "wikiWord";
-			if (pageIndex.indexOf(m) === -1) {
+			if (pageIndex.indexOf(capture) === -1) {
 				displayClass = "newWikiWord";
 			}
 			return (
-				'<a class="' +
+				' <a class="' +
 				displayClass +
 				'" href="#' +
-				m +
+				capture +
 				'">' +
-				reSpace(m) +
+				reSpace(capture) +
 				"</a>"
 			);
 		});
