@@ -72,25 +72,27 @@
 
 	/* beyond Markdown syntax extensions; 
 	concept referred to as "Gimmicks" in MDwiki (see http://dynalon.github.io/mdwiki/#!gimmicks.md)
-	currently used here just to create custom wiki links - automatic hyperlinking to pages from expressions written in PascalCase */
+	currently used here just to create custom wiki links - automatic hyperlinking to pages from expressions written in PascalCase
+	FWIW I attempted to implement this "right" way be extending the marked.js parser (https://marked.js.org/using_pro#extensions ) 
+	but could not get it to work correctly */
+	
 	function wikiFormat(text) {
-		const PascalCase = /([ (>])([A-Z][a-z]+[A-Z][A-Za-z]+)/g;
+		const PascalCase = /\b[A-Z][a-z]+[A-Z][A-Za-z]+\b/g;
 
 		let wikiText = text.replaceAll(
 			PascalCase,
-			function (match, prefix, wikiWord) {
+			function (match) {
 				let displayClass = "wikiWord";
-				if (pageIndex.indexOf(wikiWord) === -1) {
+				if (pageIndex.indexOf(match) === -1) {
 					displayClass = "newWikiWord";
 				}
 				return (
-					prefix +
 					'<a class="' +
 					displayClass +
 					'" href="#' +
-					wikiWord +
+					match +
 					'">' +
-					reSpace(wikiWord) +
+					reSpace(match) +
 					"</a>"
 				);
 			}
