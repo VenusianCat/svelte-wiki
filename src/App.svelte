@@ -71,12 +71,13 @@
 	}
 
 	/* beyond Markdown syntax extensions; 
-	concept referred to as "Gimmicks" in MDwiki (see http://dynalon.github.io/mdwiki/#!gimmicks.md)
-	currently used here just to create custom wiki links - automatic hyperlinking to pages from expressions written in PascalCase
-	FWIW I attempted to implement this "right" way be extending the marked.js parser (https://marked.js.org/using_pro#extensions ) 
-	but could not get it to work correctly */
+	concept referred to as "Gimmicks" in MDwiki (see http://dynalon.github.io/mdwiki/#!gimmicks.md) */
 	
 	function wikiFormat(text) {
+
+		/* Consider PascalCase strings as "wikiwords" - automatic hyperlinking to pages from expressions written in PascalCase */
+		/* FWIW I attempted to implement this "right" way be extending the marked.js parser (https://marked.js.org/using_pro#extensions ) 
+			but could not get it to work correctly */
 		const PascalCase = /\b[A-Z][a-z]+[A-Z][A-Za-z]+\b/g;
 
 		let wikiText = text.replaceAll(
@@ -94,6 +95,18 @@
 					'">' +
 					reSpace(match) +
 					"</a>"
+				);
+			}
+		);
+
+		/* replace strings of format n/m with an HTML symbol for the vulgar fraction */
+		const VulgarFraction = /\b([0-9])\/([0-9])\b/g;
+		wikiText = wikiText.replaceAll(
+			VulgarFraction,
+			function (match, numerator, denominator) {
+				console.log(match, numerator, denominator);
+				return (
+					'&frac' + numerator + denominator + ';'
 				);
 			}
 		);
