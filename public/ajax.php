@@ -1,5 +1,9 @@
 <?php
 
+//example of line added for error testing - 
+//var_dump(extractMetadataFromWiki(scandir('./content')));
+
+error_reporting(E_ALL);
 header('Access-Control-Allow-Origin: http://localhost:5000');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -31,6 +35,9 @@ if (isset($data->action)) {
 		case 'getIndex':
 			echo json_encode(processFilenamesToWikiWords(scandir('./content')));
 			break;
+		case 'getWikiMetadata':
+			echo json_encode(extractMetadataFromWiki(scandir('./content')));
+			break;
 		default:
 			die('No valid action provided in Ajax request.');
 	}
@@ -51,10 +58,39 @@ function processFilenamesToWikiWords($files) {
 	$wikiWords = array();
 	foreach($files as $filename) {
 		if ($filename !== '.' && $filename !== '..') {
-			$wikiWords[] = substr($filename, 0, -3);
+			$wikiWords[] = substr($filename, 0, -3); //removes the .md
 		}
 	}
 	return $wikiWords;
+}
+
+function extractMetadataFromWiki($files) {
+	$metadata = array('activeWikiWords' => array(), 'allWikiWords' => array(), 'wikiTags' => array());
+	$metadata['activeWikiWords'] = processFilenamesToWikiWords($files);
+	$metadata['allWikiWords'] = $metadata['activeWikiWords'];
+	//step through and scan each page of the wiki
+	foreach($metadata['activeWikiWords'] as $pagename) {
+		$filename = './content/'.$pagename.'.md';
+		$pageContents = file_get_contents('./content/'.$pagename.'.md');
+		//find all the wikiWords in the text
+		preg_match_all('|\b[A-Z][a-z]+[A-Z][A-Za-z]+\b|m', $pageContents, $matches);
+		if($matches[0]) {
+			foreach($matches[0] as $match) {
+				if (!in_array($match, $metadata['activeWikiWords'])) {
+					$metadata['allWikiWords'][] = $match;
+				}
+			}
+		}
+		//now find all the tags in the text
+		preg_match_all('/{([^|}]+)(|[^}]+)?}/m', $pageContents, $matches);
+		//var_dump($matches);
+		if($matches[1]) {
+			foreach($matches[1] as $match) {
+				$metadata['wikiTags'][trim($match)][] = $pagename;
+			}
+		}
+	}
+	return $metadata;
 }
 
 ?>
