@@ -90,6 +90,8 @@ function extractMetadataFromWiki($files) {
 			}
 		}
 	}
+	//sort the all wiki words array
+	
 	return $metadata;
 }
 

@@ -13,9 +13,9 @@
 
 	let hash = getHash();
 	let TopNav = "placeholder";
-	let Footer = "placeholder";
 	console.log(hash);
-	let pageIndex = Array();
+	let wikiMetaData;
+	let taggedPages = Array();
 
 	$: pageTitle = reSpace(hash);
 
@@ -40,19 +40,21 @@
 		}
 	};
 
-	getResponseFromAPI("getIndex", null, "json").then(function (result) {
-		pageIndex = result;
-		console.log(pageIndex);
+	getResponseFromAPI("getWikiMetadata", null, "json").then(function (result) {
+		wikiMetaData = result;
+		console.log(wikiMetaData);
+		for (const tag in wikiMetaData.wikiTags) {
+			console.log(tag + ";" + hash);
+			if (tag === hash.toLowerCase()) {
+				taggedPages = wikiMetaData.wikiTags[tag];
+				console.log(taggedPages);
+			}
+		}
 	});
 
 	/* grab the topnav */
 	getResponseFromAPI("load", "TopNav", "text").then(function (result) {
 		TopNav = result;
-	});
-
-	/* grab the footer */
-	getResponseFromAPI("load", "Footer", "text").then(function (result) {
-		Footer = result;
 	});
 
 	/* grab the main page body */
@@ -70,34 +72,31 @@
 		return processedHash;
 	}
 
-	/* beyond Markdown syntax extensions; 
-	concept referred to as "Gimmicks" in MDwiki (see http://dynalon.github.io/mdwiki/#!gimmicks.md) */
-	
-	function wikiFormat(text) {
+	/* beyond Markdown syntax extensions;  */
+	/* concept referred to as "Gimmicks" in MDwiki (see http://dynalon.github.io/mdwiki/#!gimmicks.md) */
+	/* FWIW I attempted to implement this "right" way be extending the marked.js parser (https://marked.js.org/using_pro#extensions )  */
+	/* but could not get it to work correctly */
 
+	function postParse(text) {
 		/* Consider PascalCase strings as "wikiwords" - automatic hyperlinking to pages from expressions written in PascalCase */
-		/* FWIW I attempted to implement this "right" way be extending the marked.js parser (https://marked.js.org/using_pro#extensions ) 
-			but could not get it to work correctly */
+
 		const PascalCase = /\b[A-Z][a-z]+[A-Z][A-Za-z]+\b/g;
 
-		let wikiText = text.replaceAll(
-			PascalCase,
-			function (match) {
-				let displayClass = "wikiWord";
-				if (pageIndex.indexOf(match) === -1) {
-					displayClass = "newWikiWord";
-				}
-				return (
-					'<a class="' +
-					displayClass +
-					'" href="#' +
-					match +
-					'">' +
-					reSpace(match) +
-					"</a>"
-				);
+		let wikiText = text.replaceAll(PascalCase, function (match) {
+			let displayClass = "wikiWord";
+			if (wikiMetaData.activeWikiWords.indexOf(match) === -1) {
+				displayClass = "newWikiWord";
 			}
-		);
+			return (
+				'<a class="' +
+				displayClass +
+				'" href="#' +
+				match +
+				'">' +
+				reSpace(match) +
+				"</a>"
+			);
+		});
 
 		/* replace strings of format n/m with an HTML symbol for the vulgar fraction */
 		const VulgarFraction = /\b([0-9])\/([0-9])\b/g;
@@ -105,11 +104,21 @@
 			VulgarFraction,
 			function (match, numerator, denominator) {
 				console.log(match, numerator, denominator);
-				return (
-					'&frac' + numerator + denominator + ';'
-				);
+				return "&frac" + numerator + denominator + ";";
 			}
 		);
+
+		/* find and format display tags of the format {tag} or {tag|background color} */
+		const tag = /{([^|}]+)(|[^}]+)?}/g;
+		wikiText = wikiText.replaceAll(tag, function (raw, tagText, colorText) {
+			console.log(raw, tagText, colorText);
+			let colorHTML = "";
+			if (colorText) {
+				colorHTML =
+					' style="background-color:' + colorText.substr(1) + '"';
+			}
+			return '<span class="tag"' + colorHTML + ">" + tagText + "</span>";
+		});
 
 		return wikiText;
 	}
@@ -141,32 +150,43 @@
 	}
 </script>
 
-<nav>{@html wikiFormat(marked(TopNav))}</nav>
 <section id="container">
 	<section id="pageContent">
+		<nav>{@html postParse(marked(TopNav))}</nav>
 		<p>Now viewing: {pageTitle}</p>
 		{#if hash !== "Index"}
-			{@html wikiFormat(marked(value))}
+			{@html postParse(marked(value))}
 		{:else}
 			<ul>
-				{#each pageIndex as page}
-					<li>{@html wikiFormat(page)}</li>
-				{/each}
+				{#if typeof wikiMetaData !== "undefined"}
+					{#each wikiMetaData.allWikiWords as page}
+						<li>{@html postParse(page)}</li>
+					{/each}
+				{/if}
 			</ul>
+		{/if}
+
+		{#if taggedPages.length}
+			<h3>Pages tagged "{hash}"</h3>
+			<nav>
+				<ul>
+					{#each taggedPages as taggedPage}
+						<li>{@html postParse(taggedPage)}</li>
+					{/each}
+				</ul>
+			</nav>
 		{/if}
 	</section>
 	{#if hash !== "Index"}
 		<section id="editor">
 			<h2>
-				Markdown Editor <button id="saveData" on:click={saveData}
-					>Save</button
-				>
+				Markdown Editor
+				<button id="saveData" on:click={saveData}>Save</button>
 			</h2>
 			<textarea bind:value />
 		</section>
 	{/if}
 </section>
-<nav>{@html wikiFormat(marked(Footer))}</nav>
 
 <style>
 	#editor {
