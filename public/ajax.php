@@ -76,7 +76,7 @@ function extractMetadataFromWiki($files) {
 		//find all the wikiWords in the text 
 		preg_match_all('/\[\[([A-Za-z ]+)\]\]/m', $pageContents, $matches);
 		if($matches[0]) {
-			foreach($matches[0] as $match) {
+			foreach($matches[1] as $match) {
 				if (!in_array($match, $metadata['activeWikiWords'])) {
 					$metadata['allWikiWords'][] = $match;
 				}
@@ -91,6 +91,7 @@ function extractMetadataFromWiki($files) {
 			}
 		}
 	}
+	sort($metadata['allWikiWords'], SORT_NATURAL | SORT_FLAG_CASE);
 	//sort the all wiki words array
 	
 	return $metadata;

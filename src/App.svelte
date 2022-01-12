@@ -79,7 +79,7 @@
 		let wikiText = text.replaceAll(wikiWordFormat, function (raw, match) {
 			let displayClass = "wikiWord";
 			if (
-				typeof wikiMetaData !== "undefined" &&
+				typeof wikiMetaData.activeWikiWords !== "undefined" &&
 				wikiMetaData.activeWikiWords.indexOf(match) === -1
 			) {
 				displayClass = "newWikiWord";
@@ -161,7 +161,7 @@
 			<ul>
 				{#if typeof wikiMetaData.allWikiWords !== "undefined"}
 					{#each wikiMetaData.allWikiWords as page}
-						<li>{@html postParse(page)}</li>
+						<li>{@html postParse('[[' + page + ']]')}</li>
 					{/each}
 				{/if}
 			</ul>
