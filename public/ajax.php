@@ -58,7 +58,8 @@ function processFilenamesToWikiWords($files) {
 	$wikiWords = array();
 	foreach($files as $filename) {
 		if ($filename !== '.' && $filename !== '..') {
-			$wikiWords[] = substr($filename, 0, -3); //removes the .md
+			$temp = substr($filename, 0, -3); //removes the .md
+			$wikiWords[] = preg_replace('/([a-z])([A-Z])/', '$1 $2', $temp);
 		}
 	}
 	return $wikiWords;
@@ -70,10 +71,10 @@ function extractMetadataFromWiki($files) {
 	$metadata['allWikiWords'] = $metadata['activeWikiWords'];
 	//step through and scan each page of the wiki
 	foreach($metadata['activeWikiWords'] as $pagename) {
-		$filename = './content/'.$pagename.'.md';
-		$pageContents = file_get_contents('./content/'.$pagename.'.md');
-		//find all the wikiWords in the text
-		preg_match_all('|\b[A-Z][a-z]+[A-Z][A-Za-z]+\b|m', $pageContents, $matches);
+		$filename = './content/'.str_replace(' ', '', $pagename).'.md';
+		$pageContents = file_get_contents($filename);
+		//find all the wikiWords in the text 
+		preg_match_all('/\[\[([A-Za-z ]+)\]\]/m', $pageContents, $matches);
 		if($matches[0]) {
 			foreach($matches[0] as $match) {
 				if (!in_array($match, $metadata['activeWikiWords'])) {

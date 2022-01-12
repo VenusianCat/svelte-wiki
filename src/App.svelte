@@ -14,10 +14,11 @@
 	let hash = getHash();
 	let TopNav = "placeholder";
 	console.log(hash);
-	let wikiMetaData;
-	let taggedPages = Array();
+	let wikiMetaData = { wikiTags: Array() };
 
 	$: pageTitle = reSpace(hash);
+	$: taggedPages = wikiMetaData.wikiTags[hash.toLowerCase()];
+	console.log(taggedPages);
 
 	let value = `Please wait while content loads...`;
 
@@ -43,13 +44,6 @@
 	getResponseFromAPI("getWikiMetadata", null, "json").then(function (result) {
 		wikiMetaData = result;
 		console.log(wikiMetaData);
-		for (const tag in wikiMetaData.wikiTags) {
-			console.log(tag + ";" + hash);
-			if (tag === hash.toLowerCase()) {
-				taggedPages = wikiMetaData.wikiTags[tag];
-				console.log(taggedPages);
-			}
-		}
 	});
 
 	/* grab the topnav */
@@ -78,22 +72,25 @@
 	/* but could not get it to work correctly */
 
 	function postParse(text) {
-		/* Consider PascalCase strings as "wikiwords" - automatic hyperlinking to pages from expressions written in PascalCase */
+		/* Consider strings surrounded by double square brackets as "wikiwords" - automatic hyperlinking to pages of that name */
 
-		const PascalCase = /\b[A-Z][a-z]+[A-Z][A-Za-z]+\b/g;
+		const wikiWordFormat = /\[\[([A-Za-z ]+)\]\]/g;
 
-		let wikiText = text.replaceAll(PascalCase, function (match) {
+		let wikiText = text.replaceAll(wikiWordFormat, function (raw, match) {
 			let displayClass = "wikiWord";
-			if (wikiMetaData.activeWikiWords.indexOf(match) === -1) {
+			if (
+				typeof wikiMetaData !== "undefined" &&
+				wikiMetaData.activeWikiWords.indexOf(match) === -1
+			) {
 				displayClass = "newWikiWord";
 			}
 			return (
 				'<a class="' +
 				displayClass +
 				'" href="#' +
-				match +
+				deSpace(match) +
 				'">' +
-				reSpace(match) +
+				match +
 				"</a>"
 			);
 		});
@@ -127,6 +124,10 @@
 		return text.replaceAll(/([a-z])([A-Z])/g, "$1 $2");
 	}
 
+	function deSpace(text) {
+		return text.replaceAll(/ /g, "");
+	}
+
 	window.addEventListener("hashchange", function () {
 		hash = getHash();
 		getResponseFromAPI("load", hash, "text").then(function (result) {
@@ -158,7 +159,7 @@
 			{@html postParse(marked(value))}
 		{:else}
 			<ul>
-				{#if typeof wikiMetaData !== "undefined"}
+				{#if typeof wikiMetaData.allWikiWords !== "undefined"}
 					{#each wikiMetaData.allWikiWords as page}
 						<li>{@html postParse(page)}</li>
 					{/each}
@@ -166,7 +167,7 @@
 			</ul>
 		{/if}
 
-		{#if taggedPages.length}
+		{#if typeof taggedPages !== "undefined" && taggedPages.length > 0}
 			<h3>Pages tagged "{hash}"</h3>
 			<nav>
 				<ul>
