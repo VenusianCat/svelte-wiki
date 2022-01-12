@@ -17,7 +17,7 @@
 	let wikiMetaData = { wikiTags: Array() };
 
 	$: pageTitle = reSpace(hash);
-	$: taggedPages = wikiMetaData.wikiTags[hash.toLowerCase()];
+	$: taggedPages = wikiMetaData.wikiTags[reSpace(hash).toLowerCase()];
 	console.log(taggedPages);
 
 	let value = `Please wait while content loads...`;
@@ -167,8 +167,9 @@
 			</ul>
 		{/if}
 
+		{console.log(taggedPages)}
 		{#if typeof taggedPages !== "undefined" && taggedPages.length > 0}
-			<h3>Pages tagged "{hash}"</h3>
+			<h3>Pages tagged "{reSpace(hash)}"</h3>
 			<nav>
 				<ul>
 					{#each taggedPages as taggedPage}
