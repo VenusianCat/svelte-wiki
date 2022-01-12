@@ -88,6 +88,11 @@ function extractMetadataFromWiki($files) {
 		if($matches[1]) {
 			foreach($matches[1] as $match) {
 				$metadata['wikiTags'][trim($match)][] = $pagename;
+				//tags are also potential pages (if transformend to title case)
+				$recasedMatch = preg_replace_callback('/\b([a-z])/', function($matches) { return strtoupper($matches[1]); },$match);
+				if (!in_array($recasedMatch, $metadata['activeWikiWords'])) {
+					$metadata['allWikiWords'][] = $recasedMatch;
+				}
 			}
 		}
 	}

@@ -161,7 +161,7 @@
 			<ul>
 				{#if typeof wikiMetaData.allWikiWords !== "undefined"}
 					{#each wikiMetaData.allWikiWords as page}
-						<li>{@html postParse('[[' + page + ']]')}</li>
+						<li>{@html postParse("[[" + page + "]]")}</li>
 					{/each}
 				{/if}
 			</ul>
@@ -172,7 +172,7 @@
 			<nav>
 				<ul>
 					{#each taggedPages as taggedPage}
-						<li>{@html postParse(taggedPage)}</li>
+						<li>{@html postParse("[[" + taggedPage + "]]")}</li>
 					{/each}
 				</ul>
 			</nav>
