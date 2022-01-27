@@ -77,7 +77,7 @@ function extractMetadataFromWiki($files) {
 		preg_match_all('/\[\[([A-Za-z ]+)\]\]/m', $pageContents, $matches);
 		if($matches[0]) {
 			foreach($matches[1] as $match) {
-				if (!in_array($match, $metadata['activeWikiWords'])) {
+				if (!in_array($match, $metadata['allWikiWords'])) {
 					$metadata['allWikiWords'][] = $match;
 				}
 			}

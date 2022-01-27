@@ -167,7 +167,6 @@
 			</ul>
 		{/if}
 
-		{console.log(taggedPages)}
 		{#if typeof taggedPages !== "undefined" && taggedPages.length > 0}
 			<h3>Pages tagged "{reSpace(hash)}"</h3>
 			<nav>
