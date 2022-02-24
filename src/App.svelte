@@ -12,6 +12,9 @@
 	});
 
 	let hash = getHash();
+	let editMode = false;
+	let key;
+	let lastThreeKeystrokes = "";
 	let TopNav = "placeholder";
 	console.log(hash);
 	let wikiMetaData = { wikiTags: Array() };
@@ -21,6 +24,23 @@
 	console.log(taggedPages);
 
 	let value = `Please wait while content loads...`;
+
+	/* 
+	
+	just a little security function; type 'poi' enable edit mode
+	
+	*/
+	function handleKeydown(event) {
+		key = event.key;
+		lastThreeKeystrokes = lastThreeKeystrokes.concat(key);
+		if (lastThreeKeystrokes.length > 3) {
+			lastThreeKeystrokes = lastThreeKeystrokes.slice(1, 4);
+		}
+		if (lastThreeKeystrokes === "poi") {
+			editMode = true;
+		}
+		console.log(key, lastThreeKeystrokes);
+	}
 
 	/* my even newer more generic function to grab text from the API */
 	const getResponseFromAPI = async (action, id, responseType) => {
@@ -149,7 +169,14 @@
 				console.log(text);
 			});
 	}
+
+	function closeEditor() {
+		saveData();
+		editMode = false;
+	}
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <section id="container">
 	<section id="pageContent">
@@ -178,11 +205,12 @@
 			</nav>
 		{/if}
 	</section>
-	{#if hash !== "Index"}
+	{#if hash !== "Index" && editMode}
 		<section id="editor">
 			<h2>
 				Markdown Editor
-				<button id="saveData" on:click={saveData}>Save</button>
+				<button on:click={saveData}>Save</button>
+				<button on:click={closeEditor}>Save and close</button>
 			</h2>
 			<textarea bind:value />
 		</section>
@@ -203,7 +231,7 @@
 		color: hsl(0, 0%, 10%);
 		line-height: 2em;
 	}
-	#saveData {
+	button {
 		display: inline-block;
 		margin-left: 80px;
 		font-size: 0.8em;
